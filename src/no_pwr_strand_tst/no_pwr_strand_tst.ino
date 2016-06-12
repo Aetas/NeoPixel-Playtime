@@ -12,7 +12,7 @@
 #include <Adafruit_NeoPixel.h>
  
 #define PIN      6
-#define N_LEDS 144
+#define N_LEDS 60
  
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
  
@@ -26,8 +26,8 @@ void loop() {
   chase(strip.Color(0, 0, 255)); // Blue
 }
  
-static void chase(uint32_t c) {
-  for(uint16_t i=0; i<strip.numPixels()+4; i++) {
+void chase(uint32_t c) {
+  for(uint16_t i=0; i < strip.numPixels()+4; i++) {
       strip.setPixelColor(i  , c); // Draw new pixel
       strip.setPixelColor(i-4, 0); // Erase pixel a few steps back
       strip.show();
