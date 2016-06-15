@@ -4,6 +4,10 @@
 #define N_LED 60          // number of LEDs per strand. (0-59)
 #define PIN_FREQ 2        // Frequency read pin. Pin 2 isn't PWM and can use ArrachInterrupt()
 
+#define R_MASK 0xFF000
+#define G_MASK 0xFF00
+#define B_MASK 0xFF  //For bit masking purposes
+
 // Side note: 800kHz is a 1.25 us period, so delay times and sampling won't ever really approach that limit (here)
 // (update) You know, I say that but the notes on ::setBrightness() make me worry a bit about it. Still, should be fine.
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LED, PIN_LED_OUT, NEO_GRB + NEO_KHZ800); //initialize. RGB, 800kHz data rate
@@ -15,9 +19,10 @@ void setup() {
 
 // *.Color(R, G, B) takes numerical RGB values (0-255, brigness) and returns a 32-bit color code
 void loop() {
-  fadeLoop(strip.Color(250, 0, 0)); // red
-  fadeLoop(strip.Color(0, 250, 0)); // green
-  fadeLoop(strip.Color(0, 0, 250)); // blue
+  fadeLoop(strip.Color(255, 0, 0)); // red
+  fadeLoop(strip.Color(0, 255, 0)); // green
+  fadeLoop(strip.Color(0, 0, 255)); // blue
+  fadeLoop(strip.Color(255, 0, 255)); // test
   //fadeLoop(strip.Color(255, 255, 255));
   //fadeLoop(1);
   //fadeLoop(2);
@@ -66,11 +71,14 @@ void fadeLoop(uint32_t rgb) {
     strip.setPixelColor(i-1, tst_halvePreviousBrightness(i-1));
     strip.setPixelColor(i-2, tst_halvePreviousBrightness(i-2));
     strip.setPixelColor(i-3, tst_halvePreviousBrightness(i-3));
+    //strip.setPixelColor(i-1, (strip.getPixelColor(i-1) >> 1));
+    //strip.setPixelColor(i-2, (strip.getPixelColor(i-2) >> 1));
+    //strip.setPixelColor(i-3, (strip.getPixelColor(i-3) >> 1));
     strip.setPixelColor(i-4, 0x00, 0x00, 0x00); //set off
                                                 //Important to note that since Clear is not called, the pixel will remain active in mem until program concludes.
                                                 // this means that if a pixel is called, it will never clear. Only important when thinking of tach.
     strip.show(); // fin
-    delay(80);    // 40ms delay. Could be a wide variety of things
+    delay(40);    // 40ms delay. Could be a wide variety of things
   }
   //return
 }
@@ -102,9 +110,9 @@ void halvePreviousBrightness(uint16_t n, uint8_t &colorMask) { // num is 16 bits
 uint32_t tst_halvePreviousBrightness(uint16_t n) {
   //originally the masks had their own vars to sepparate out the bits with. The I realized I was being stupid and I don't need to allocate for that. Infact, a define would be great.
   // reuse vars because the mask is only needed once
-  uint8_t r_mask = (strip.getPixelColor(n) & 0x0000FF) >> 1; // get the pixel 32-bit color. Read w/ mask. Halve brightness.
-  uint8_t g_mask = (strip.getPixelColor(n) & 0x00FF) >> 1;
-  uint8_t b_mask = (strip.getPixelColor(n) & 0xFF) >> 1; 
+  uint8_t r_mask = (strip.getPixelColor(n) & R_MASK) >> 1; // get the pixel 32-bit color. Read w/ mask. Halve brightness.
+  uint8_t g_mask = (strip.getPixelColor(n) & G_MASK) >> 1;
+  uint8_t b_mask = (strip.getPixelColor(n) & B_MASK) >> 1; 
                                                   // I could technically do this in the return line.
                                                   // Also, I could probably devise an algorithm to just use binary operators to dim it with a custom mask.
                                                   // might be worth looking into. Maybe.
