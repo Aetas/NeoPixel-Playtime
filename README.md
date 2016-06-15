@@ -23,4 +23,7 @@ This means that I've been writing my own dimming algorithm based on Mask+Shift b
 Strangely enough though, when 'dimming' red or green, the dimmed pixel turns off. Working as intended! Dims to the point of turning off. This is more helpful than it seems though because all 0's are easy to catch but my eyes cannot tell the difference between 60 and 100 brightness.  
 So from here I need to look at the .show() function to see how it unpacks and maybe write a layer in between. I'd rather not modify the lib.
 
-I should also try setting my strip to RGB in the constructor and see if I can get away with it. TBD 
+I should also try setting my strip to RGB in the constructor and see if I can get away with it. TBD  
+^ Yeah, that didn't work. As one might expect ^
+
+Still, now I think I know what to do. Eschew the setPixelColor and just use the same technique as the method itself did. Now I have to handle a pointer to the pixel array but that's not a problem.
