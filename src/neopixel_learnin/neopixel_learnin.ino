@@ -133,3 +133,11 @@ uint32_t tst_halvePreviousBrightness(uint16_t n) {
 // Maybe functional was not the way to go.
 // I can eak out a large amount of performance by keeping static masks in global. Classic initialization+mem bloat as an instructions trade-off.
 // A closure might be a boon as well for returns.
+
+
+void pointerHalvePreviousBrightness(uint16_t n) {
+  if (n < strip.numPixels()) {  //make sure we're not out of line
+    
+  }
+}
+
