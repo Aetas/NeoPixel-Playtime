@@ -22,7 +22,7 @@ void loop() {
   fadeLoop(strip.Color(255, 0, 0)); // red
   fadeLoop(strip.Color(0, 255, 0)); // green
   fadeLoop(strip.Color(0, 0, 255)); // blue
-  fadeLoop(strip.Color(255, 0, 255)); // test
+  //fadeLoop(strip.Color(255, 0, 255)); // test
   //fadeLoop(strip.Color(255, 255, 255));
   //fadeLoop(1);
   //fadeLoop(2);
@@ -78,7 +78,7 @@ void fadeLoop(uint32_t rgb) {
                                                 //Important to note that since Clear is not called, the pixel will remain active in mem until program concludes.
                                                 // this means that if a pixel is called, it will never clear. Only important when thinking of tach.
     strip.show(); // fin
-    delay(40);    // 40ms delay. Could be a wide variety of things
+    delay(200);    // 40ms delay. Could be a wide variety of things
   }
   //return
 }
