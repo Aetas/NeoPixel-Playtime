@@ -15,9 +15,10 @@ void setup() {
 
 // *.Color(R, G, B) takes numerical RGB values (0-255, brigness) and returns a 32-bit color code
 void loop() {
-  fadeLoop(strip.Color(255, 0, 0)); // red
-  fadeLoop(strip.Color(0, 255, 0)); // green
-  fadeLoop(strip.Color(0, 0, 255)); // blue
+  fadeLoop(strip.Color(250, 0, 0)); // red
+  fadeLoop(strip.Color(0, 250, 0)); // green
+  fadeLoop(strip.Color(0, 0, 250)); // blue
+  //fadeLoop(strip.Color(255, 255, 255));
   //fadeLoop(1);
   //fadeLoop(2);
   //fadeLoop(3); //bit magic makes these vestigial
@@ -63,13 +64,13 @@ void fadeLoop(uint32_t rgb) {
 
     //I wanted to loop this but it seems dumb to allocate mem for a variable when I don't need it to do anything different each run.
     strip.setPixelColor(i-1, tst_halvePreviousBrightness(i-1));
-    strip.setPixelColor(i-2, tst_halvePreviousBrightness(i-1));
-    strip.setPixelColor(i-3, tst_halvePreviousBrightness(i-1));
+    strip.setPixelColor(i-2, tst_halvePreviousBrightness(i-2));
+    strip.setPixelColor(i-3, tst_halvePreviousBrightness(i-3));
     strip.setPixelColor(i-4, 0x00, 0x00, 0x00); //set off
                                                 //Important to note that since Clear is not called, the pixel will remain active in mem until program concludes.
                                                 // this means that if a pixel is called, it will never clear. Only important when thinking of tach.
     strip.show(); // fin
-    delay(40);    // 40ms delay. Could be a wide variety of things
+    delay(80);    // 40ms delay. Could be a wide variety of things
   }
   //return
 }
@@ -99,18 +100,16 @@ void halvePreviousBrightness(uint16_t n, uint8_t &colorMask) { // num is 16 bits
 // and I'd need another pointer for the function.
 // Now all I need it the pixel number! yay!
 uint32_t tst_halvePreviousBrightness(uint16_t n) {
-  // another note on memory, this can be done in ~1/3rd the memory by using a uint8_t* rgb pointer and storing the shifts in *this to be returned.
-  // but alas, whatever.
-  uint8_t r_mask = 0x0000FF;
-  uint8_t g_mask = 0x00FF;
-  uint8_t b_mask = 0xFF;
-  
+  //originally the masks had their own vars to sepparate out the bits with. The I realized I was being stupid and I don't need to allocate for that. Infact, a define would be great.
   // reuse vars because the mask is only needed once
-  r_mask = (strip.getPixelColor(n) & r_mask) / 2; // get the pixel 32-bit color. Read w/ mask. Halve brightness. Store in self.
-  g_mask = (strip.getPixelColor(n) & r_mask) / 2;
-  b_mask = (strip.getPixelColor(n) & r_mask) / 2; // I could technically do this in the return line.
+  uint8_t r_mask = (strip.getPixelColor(n) & 0x0000FF) >> 1; // get the pixel 32-bit color. Read w/ mask. Halve brightness.
+  uint8_t g_mask = (strip.getPixelColor(n) & 0x00FF) >> 1;
+  uint8_t b_mask = (strip.getPixelColor(n) & 0xFF) >> 1; 
+                                                  // I could technically do this in the return line.
                                                   // Also, I could probably devise an algorithm to just use binary operators to dim it with a custom mask.
                                                   // might be worth looking into. Maybe.
+                                                  // (UPDATE): that's exactly what I did.
+                                                  // How on earth could I have forgotten that a bit shift to the right is the ~same as dividing by 2? Like goddamn.
 
   return ((uint32_t)r_mask << 16) | ((uint32_t)g_mask <<  8) | b_mask;
   // ripped from the lib, just shifts the 8 bits to their respective places in the 32-bit color code. Pretty self-explanatory.
