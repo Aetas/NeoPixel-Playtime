@@ -15,12 +15,12 @@ void setup() {
 
 // *.Color(R, G, B) takes numerical RGB values (0-255, brigness) and returns a 32-bit color code
 void loop() {
-  //fadeLoop(strip.Color(255, 0, 0)); // red
-  //fadeLoop(strip.Color(0, 255, 0)); // green
-  //fadeLoop(strip.Color(0, 0, 255)); // blue
-  fadeLoop(1);
-  fadeLoop(2);
-  fadeLoop(3);
+  fadeLoop(strip.Color(255, 0, 0)); // red
+  fadeLoop(strip.Color(0, 255, 0)); // green
+  fadeLoop(strip.Color(0, 0, 255)); // blue
+  //fadeLoop(1);
+  //fadeLoop(2);
+  //fadeLoop(3); //bit magic makes these vestigial
 }
 
 // strip.numPixels()+4 because it cannot write to nonexistant LEDs and I need the loop to 
@@ -37,11 +37,11 @@ void loop() {
 // Might be nice, actually since the power requirements go up as the revs increase.
 
 // These comments should really go in a *.ideas text file.
-void fadeLoop(uint8_t rgb) {
+void fadeLoop(uint32_t rgb) {
   // ugly and unfortunate, but the library doesn't have a great brightness adjusting function that can be called repeatedly
   // update note: I should be able to just handle the color library with bit access to the uint32_t color. (uint32_t)(color >> 16), etc.
   // I can probably ditch this in general by saying (uint8_t)intensity >> rgb * 8 (for a byte) which will take care of positioning.
-  uint32_t color; // guarantees that color is in scope for later
+  /* uint32_t color; // guarantees that color is in scope for later. Might not matter anymore since I removed the ref. pointer in the halving fn call (argument).
   if (rgb == 0xFF) {
     color = strip.Color(255,0,0);
   } else if (rgb == 0x00FF) {
@@ -50,10 +50,10 @@ void fadeLoop(uint8_t rgb) {
     color = strip.Color(0,0,255);
   } else {
     return; // break out of fade loop for invalid color
-  }
+  } */
   
   for(uint16_t i = 0; i < strip.numPixels()+4; i++) {
-    strip.setPixelColor(i, color);
+    strip.setPixelColor(i, rgb);
     // I still need a way to dim the previous LEDs here. But the color code is a 32-bit compressed code.
     // and nobody on the wide open internet seems to be able to explain it.
     // (I already looked in the lib, it returns: " ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b; "
@@ -89,7 +89,7 @@ void halvePreviousBrightness(uint16_t n, uint8_t &colorMask) { // num is 16 bits
 
   // However. This is the first iteration of this and I already know what value is passed.
     // I could make this more functional still and stack another frame to handle. Or just a really long return line.
-  uint8_t newColor = (strip.getPixelColor(n) & colorMask) / 2;
+  uint8_t newColor = (strip.getPixelColor(n) & colorMask) / 2;  //this will make -Wall bitch since it's unused. But that's the life of an unused fn
   
 }
 
