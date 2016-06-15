@@ -24,7 +24,7 @@ void PhatLoop(uint8_t c) {
     strip.setPixelColor(i-1, (c/2), 0, 0);  // halve brightness
     strip.setPixelColor(i-2, (c/4), 0, 0);  // and again
     strip.setPixelColor(i-3, (c/8), 0, 0);  // and again
-    strip.setPixelColor(i-4, 0x00, 0, 0);   // turn off
+    strip.setPixelColor(i-4, 0, 0, 0);   // turn off
     //I don't have to worry about being out of bounds or checking for it because it is caught first thing in the setPixelColor() method.
     //catching it before the fn call would only put the instruction here rather than the fn frame. No difference.
     strip.show();
