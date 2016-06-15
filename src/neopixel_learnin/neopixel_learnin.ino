@@ -1,3 +1,8 @@
+// I'll be honest, after all my testing and refusing to delete comments + old code,
+// I expect exactly 0 people to be able to follow this 'program'.
+// Fortunately the real program will reside in the tachometer dir, this is just for learning.
+// A.k.a. you have been warned.
+
 #include <Adafruit_NeoPixel.h>
 
 #define PIN_LED_OUT 6     // dig. PWM out pin for LED control
@@ -19,14 +24,18 @@ void setup() {
 
 // *.Color(R, G, B) takes numerical RGB values (0-255, brigness) and returns a 32-bit color code
 void loop() {
-  fadeLoop(strip.Color(255, 0, 0)); // red
-  fadeLoop(strip.Color(0, 255, 0)); // green
-  fadeLoop(strip.Color(0, 0, 255)); // blue
+  //fadeLoop(strip.Color(255, 0, 0)); // red
+  //fadeLoop(strip.Color(0, 255, 0)); // green
+  //fadeLoop(strip.Color(0, 0, 255)); // blue
   //fadeLoop(strip.Color(255, 0, 255)); // test
   //fadeLoop(strip.Color(255, 255, 255));
   //fadeLoop(1);
   //fadeLoop(2);
   //fadeLoop(3); //bit magic makes these vestigial
+
+  phatFadeLoop(strip.Color(255, 0, 0)); // red
+  phatFadeLoop(strip.Color(0, 255, 0)); // green
+  phatFadeLoop(strip.Color(0, 0, 255)); // blue
 }
 
 // strip.numPixels()+4 because it cannot write to nonexistant LEDs and I need the loop to 
@@ -134,10 +143,30 @@ uint32_t tst_halvePreviousBrightness(uint16_t n) {
 // I can eak out a large amount of performance by keeping static masks in global. Classic initialization+mem bloat as an instructions trade-off.
 // A closure might be a boon as well for returns.
 
-
-void pointerHalvePreviousBrightness(uint16_t n) {
-  if (n < strip.numPixels()) {  //make sure we're not out of line
-    
+// Inspired by the phatest of loops, this function is to test out bringing setPixelColor inside the function and returning nothing.
+void phatFadeLoop(uint32_t rgb) {
+  // causes a loop of specified color
+  // forces start at beginning and goes to end. Specifying pixels would require separating loop from function call.
+  // easy to do but not needed.
+  uint8_t r, g, b;
+  for(uint16_t i = 0; i < strip.numPixels()+4; i++) {
+    strip.setPixelColor(i, rgb);
+    //extract colors:
+    r = (uint8_t)(rgb >> 16),
+    g = (uint8_t)(rgb >> 8),
+    b = (uint8_t)rgb;
+    // Possible bug with crazy colors, the color passed might not be what I want on the previous LEDs.
+    // Easy fix would be to call getPixelColor and populate r,g,b with codes and then throw them to setPixelColor()
+    // But that would be expensive. Will probably have to come up with something for the tach where it gets more red as the rpms climb.
+    strip.setPixelColor(i-1, r >> 1, g >> 1, b >> 1);
+    strip.setPixelColor(i-2, r >> 2, g >> 2, b >> 2);
+    strip.setPixelColor(i-3, r >> 3, g >> 3, b >> 3);
+    strip.setPixelColor(i-4, 0x00, 0x00, 0x00); //set off
+                                                //Important to note that since Clear is not called, the pixel will remain active in mem until program concludes.
+                                                // this means that if a pixel is called, it will never clear. Only important when thinking of tach.
+    strip.show(); // fin
+    delay(100);    // 40ms delay. Could be a wide variety of things
   }
+  //return
 }
 
