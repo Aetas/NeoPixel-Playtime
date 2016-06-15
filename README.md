@@ -30,3 +30,6 @@ Still, now I think I know what to do. Eschew the setPixelColor and just use the 
 
 The problem was actually the brightness attribute in the strip. The setPixelColor() method actually multiplied the rgb value by the brightness, which I don't touch.  
 That means that every time I would adjust the rgb values, setPixelColor() would do whatever the fuck it felt like when I sent the rgb code to it.
+
+PhatLoop() is, unfortunately, simple and maintainable. I dearly wanted to pull an awesome pointer->bit-magic assignment & division implementation to blow yer granny's socks off but it's probably for the best I didn't. I would bet a gratuitous sum of money that I wouldn't remember how to maintain that code in a months time.  
+Still, it sounds like fun so I might make a separate function that does it. It would be a very powerful function to behold.
