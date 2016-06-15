@@ -6,9 +6,7 @@
 
 // Side note: 800kHz is a 1.25 us period, so delay times and sampling won't ever really approach that limit (here)
 // (update) You know, I say that but the notes on ::setBrightness() make me worry a bit about it. Still, should be fine.
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800); //initialize. RGB, 800kHz data rate
-
-static void fadeLoop();
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LED, PIN_LED_OUT, NEO_GRB + NEO_KHZ800); //initialize. RGB, 800kHz data rate
 
 void setup() {
   strip.begin();  //Thrilling.
@@ -39,16 +37,17 @@ void loop() {
 // Might be nice, actually since the power requirements go up as the revs increase.
 
 // These comments should really go in a *.ideas text file.
-static void fadeLoop(uint8_t rgb) {
+void fadeLoop(uint8_t rgb) {
   // ugly and unfortunate, but the library doesn't have a great brightness adjusting function that can be called repeatedly
   // update note: I should be able to just handle the color library with bit access to the uint32_t color. (uint32_t)(color >> 16), etc.
   // I can probably ditch this in general by saying (uint8_t)intensity >> rgb * 8 (for a byte) which will take care of positioning.
+  uint32_t color; // guarantees that color is in scope for later
   if (rgb == 0xFF) {
-    uint32_t color = strip.Color(255,0,0);
+    color = strip.Color(255,0,0);
   } else if (rgb == 0x00FF) {
-    uint32_t color = strip.Color(0,255,0);
+    color = strip.Color(0,255,0);
   } else if (rgb == 0x0000FF) {
-    uint32_t color = strip.Color(0,0,255);
+    color = strip.Color(0,0,255);
   } else {
     return; // break out of fade loop for invalid color
   }
@@ -81,7 +80,7 @@ static void fadeLoop(uint8_t rgb) {
 // I could use the lib more and call reducePrevBright to setPixelColor.
 // ^ then I could just use the same 'return ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b;' code directly into setPixelColor().
 // Yay functional programming!
-uint32_t halvePreviousBrightness(uint16_t &n, uint8_t &colorMask) { // num is 16 bits instead of 8 because there is a 144 LED/m version that the lib supports
+void halvePreviousBrightness(uint16_t n, uint8_t &colorMask) { // num is 16 bits instead of 8 because there is a 144 LED/m version that the lib supports
   // n = pixel number
   // mask r (0x0000FF) -> halve
   // mask g (0x00FF) -> halve
@@ -99,7 +98,7 @@ uint32_t halvePreviousBrightness(uint16_t &n, uint8_t &colorMask) { // num is 16
 // I'd have to pass rgb from loop() and multiply the shift (i.e. >> rgb * 8).
 // and I'd need another pointer for the function.
 // Now all I need it the pixel number! yay!
-uint32_t tst_halvePreviousBrightness(uint16_t &n) {
+uint32_t tst_halvePreviousBrightness(uint16_t n) {
   // another note on memory, this can be done in ~1/3rd the memory by using a uint8_t* rgb pointer and storing the shifts in *this to be returned.
   // but alas, whatever.
   uint8_t r_mask = 0x0000FF;
@@ -107,9 +106,9 @@ uint32_t tst_halvePreviousBrightness(uint16_t &n) {
   uint8_t b_mask = 0xFF;
   
   // reuse vars because the mask is only needed once
-  r_mask = (strip.GetPixelColor(n) & r_mask) / 2; // get the pixel 32-bit color. Read w/ mask. Halve brightness. Store in self.
-  g_mask = (strip.GetPixelColor(n) & r_mask) / 2;
-  b_mask = (strip.GetPixelColor(n) & r_mask) / 2; // I could technically do this in the return line.
+  r_mask = (strip.getPixelColor(n) & r_mask) / 2; // get the pixel 32-bit color. Read w/ mask. Halve brightness. Store in self.
+  g_mask = (strip.getPixelColor(n) & r_mask) / 2;
+  b_mask = (strip.getPixelColor(n) & r_mask) / 2; // I could technically do this in the return line.
                                                   // Also, I could probably devise an algorithm to just use binary operators to dim it with a custom mask.
                                                   // might be worth looking into. Maybe.
 
