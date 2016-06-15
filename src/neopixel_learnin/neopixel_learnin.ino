@@ -5,6 +5,7 @@
 #define PIN_FREQ 2        // Frequency read pin. Pin 2 isn't PWM and can use ArrachInterrupt()
 
 // Side note: 800kHz is a 1.25 us period, so delay times and sampling won't ever really approach that limit (here)
+// (update) You know, I say that but the notes on ::setBrightness() make me worry a bit about it. Still, should be fine.
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800); //initialize. RGB, 800kHz data rate
 
 static void fadeLoop();
@@ -60,10 +61,18 @@ static void fadeLoop(uint8_t rgb) {
     // Update: it's just writing the rgb color codes through bit shifting into a 32-bit variable.
     // With a little bit (hah) of evil type management, it could be slimmed down to 24 bits (wrgb vs rgb).
     // I doubt I'll have memeory issues with such things. Still, 3 bytes vs 4 bytes multiplied by at least 60 is quite a bit of s(h)avings.
-    
+
+    //I wanted to loop this but it seems dumb to allocate mem for a variable when I don't need it to do anything different each run.
+    strip.setPixelColor(i-1, tst_halvePreviousBrightness(i-1));
+    strip.setPixelColor(i-2, tst_halvePreviousBrightness(i-1));
+    strip.setPixelColor(i-3, tst_halvePreviousBrightness(i-1));
+    strip.setPixelColor(i-4, 0x00, 0x00, 0x00); //set off
+                                                //Important to note that since Clear is not called, the pixel will remain active in mem until program concludes.
+                                                // this means that if a pixel is called, it will never clear. Only important when thinking of tach.
     strip.show(); // fin
-    delay(40);    // 40ms delay
+    delay(40);    // 40ms delay. Could be a wide variety of things
   }
+  //return
 }
 
 // I think I'm going to have to halve the values of the rgb code.
@@ -98,12 +107,23 @@ uint32_t tst_halvePreviousBrightness(uint16_t &n) {
   uint8_t b_mask = 0xFF;
   
   // reuse vars because the mask is only needed once
-  r_mask = (strip.GetPixelColor(n) & r_mask) / 2; //get the pixel 32-bit color. Read w/ mask. Halve brightness. Store in self.
+  r_mask = (strip.GetPixelColor(n) & r_mask) / 2; // get the pixel 32-bit color. Read w/ mask. Halve brightness. Store in self.
   g_mask = (strip.GetPixelColor(n) & r_mask) / 2;
   b_mask = (strip.GetPixelColor(n) & r_mask) / 2; // I could technically do this in the return line.
                                                   // Also, I could probably devise an algorithm to just use binary operators to dim it with a custom mask.
                                                   // might be worth looking into. Maybe.
 
   return ((uint32_t)r_mask << 16) | ((uint32_t)g_mask <<  8) | b_mask;
+  // ripped from the lib, just shifts the 8 bits to their respective places in the 32-bit color code. Pretty self-explanatory.
 }
 
+// The brightness variable in the lib is rather confusing. 
+// The idea of a brightness is simple until you realize it's an independant variable from the pixel pointer array 
+// Which is all fun and good. But wait. You want pixels of differing brightness levels? Well shit, this variable only stores one level for the whole string.
+// Another interesting note, in the fn/method definition file of the lib, it mentions that the brightness level is a setup-time sloppy bitch
+// (they admitt it's a bit lossy, particularly for large changes and low levels) because they did some 8x8 multiplication magic
+// to ease the instruction sets on a cycle so the WS2811/WS2812 (the LED+driver chip) timings can play nice.
+// This worries me a wee bit because I have a rather large batch of instructions from the halving process and I haven't even put in the colors or tach read.
+// Maybe functional was not the way to go.
+// I can eak out a large amount of performance by keeping static masks in global. Classic initialization+mem bloat as an instructions trade-off.
+// A closure might be a boon as well for returns.
