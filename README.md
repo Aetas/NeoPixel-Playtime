@@ -27,3 +27,6 @@ I should also try setting my strip to RGB in the constructor and see if I can ge
 ^ Yeah, that didn't work. As one might expect ^
 
 Still, now I think I know what to do. Eschew the setPixelColor and just use the same technique as the method itself did. Now I have to handle a pointer to the pixel array but that's not a problem.
+
+The problem was actually the brightness attribute in the strip. The setPixelColor() method actually multiplied the rgb value by the brightness, which I don't touch.  
+That means that every time I would adjust the rgb values, setPixelColor() would do whatever the fuck it felt like when I sent the rgb code to it.
