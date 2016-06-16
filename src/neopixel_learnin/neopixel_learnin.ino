@@ -33,9 +33,13 @@ void loop() {
   //fadeLoop(2);
   //fadeLoop(3); //bit magic makes these vestigial
 
-  phatFadeLoop(strip.Color(255, 0, 0)); // red
-  phatFadeLoop(strip.Color(0, 255, 0)); // green
-  phatFadeLoop(strip.Color(0, 0, 255)); // blue
+  phatFadeLoop(strip.Color(255, 0, 0));     // red
+  phatFadeLoop(strip.Color(0, 255, 0));     // green
+  phatFadeLoop(strip.Color(0, 0, 255));     // blue
+  phatFadeLoop(strip.Color(255, 0, 255));   // purp
+  phatFadeLoop(strip.Color(255, 255, 0));   // yellow
+  phatFadeLoop(strip.Color(0, 255, 255));   // cyan
+  phatFadeLoop(strip.Color(255, 255, 255)); // yellow
 }
 
 // strip.numPixels()+4 because it cannot write to nonexistant LEDs and I need the loop to 
@@ -165,7 +169,7 @@ void phatFadeLoop(uint32_t rgb) {
                                                 //Important to note that since Clear is not called, the pixel will remain active in mem until program concludes.
                                                 // this means that if a pixel is called, it will never clear. Only important when thinking of tach.
     strip.show(); // fin
-    delay(100);    // 40ms delay. Could be a wide variety of things
+    delay(50);    // 40ms delay. Could be a wide variety of things
   }
   //return
 }
